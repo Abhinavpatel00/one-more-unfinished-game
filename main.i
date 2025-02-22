@@ -785,8 +785,6 @@
 # 0 "<built-in>"
 #define __DECIMAL_BID_FORMAT__ 1
 # 0 "<command-line>"
-#define VK_USE_PLATFORM_WAYLAND_KHR 1
-# 0 "<command-line>"
 # 1 "/usr/include/stdc-predef.h" 1 3 4
 # 19 "/usr/include/stdc-predef.h" 3 4
 #define _STDC_PREDEF_H 1
@@ -13375,44 +13373,53 @@ extern __attribute__ ((visibility("default"))) const char * SDL_GetRevision(void
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 240
-#define TILE_SIZE 16
+#define TILE_SIZE 200
 
 
 # 8 "main.c"
+int countx = 3;
+int county = 3;
+int tile_size = 200;
+
 int
 main(int argc, char* argv[]) {
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface = 
-# 12 "main.c" 3 4
+# 16 "main.c" 3 4
                           ((void *)0)
-# 12 "main.c"
+# 16 "main.c"
                               ;
     SDL_Texture* texture = 
-# 13 "main.c" 3 4
+# 17 "main.c" 3 4
                           ((void *)0)
-# 13 "main.c"
+# 17 "main.c"
                               ;
     SDL_Event event;
 
     if (!SDL_Init(
-# 16 "main.c" 3 4
+# 20 "main.c" 3 4
                  0x00000020u 
-# 16 "main.c"
+# 20 "main.c"
                                 | 
-# 16 "main.c" 3 4
+# 20 "main.c" 3 4
                                   0x00004000u
-# 16 "main.c"
+# 20 "main.c"
                                                  )) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
         return 3;
     }
 
     if (!SDL_CreateWindowAndRenderer("Hello SDL", 800, 240, 
-# 21 "main.c" 3 4
-                                                           0x0000000000000020UL
-# 21 "main.c"
-                                                                               , &window, &renderer)) {
+# 25 "main.c" 3 4
+                                                           0x0000000000000020UL 
+# 25 "main.c"
+                                                                                | 
+# 25 "main.c" 3 4
+                                                                                  0x0000000000000001UL
+# 25 "main.c"
+                                                                                                       , &window,
+                                     &renderer)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
         return 3;
     }
@@ -13430,25 +13437,48 @@ main(int argc, char* argv[]) {
 
         int window_height = 0;
         int window_width = 0;
+
         SDL_GetWindowSize(window, &window_width, &window_height);
         SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0xFF, 0xFF);
-        int total_rows = window_height/ 16;
+        int total_rows = window_height / tile_size;
+        int tolal_column = window_width / tile_size;
         for (int row = 0; row < total_rows; ++row) {
+            SDL_RenderLine(renderer, 0, (row + 1) * tile_size, window_width, (row + 1) * tile_size);
+        }
+        for (int col = 0; col < tolal_column; ++col) {
+            SDL_RenderLine(renderer, (col + 1) * tile_size, 0, (col + 1) * tile_size, window_height);
+        }
 
-            SDL_RenderLine(renderer, 0, (row + 1) * 16, window_width , (row + 1) * 16);
+        SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0xFF, 0xFF);
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_D) {
+            countx++;
         }
-        for (int col = 0; col < window_width / 16; ++col) {
-            SDL_RenderLine(renderer, (col + 1) * 16, 0, (col + 1) * 16, window_height);
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_S) {
+            county++;
         }
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_A) {
+            countx--;
+        }
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_W) {
+            county--;
+        }
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_M) {
+            tile_size--;
+        }
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.scancode == SDL_SCANCODE_N) {
+            tile_size++;
+        }
+
+        SDL_RenderFillRect(renderer, &(SDL_FRect){countx * tile_size, county * tile_size, tile_size, tile_size});
 
         SDL_RenderTexture(renderer, texture, 
-# 50 "main.c" 3 4
+# 78 "main.c" 3 4
                                             ((void *)0)
-# 50 "main.c"
+# 78 "main.c"
                                                 , 
-# 50 "main.c" 3 4
+# 78 "main.c" 3 4
                                                   ((void *)0)
-# 50 "main.c"
+# 78 "main.c"
                                                       );
         SDL_RenderPresent(renderer);
     }
